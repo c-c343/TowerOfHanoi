@@ -22,47 +22,41 @@
 #include "HanoiTowers.h"
 #include <iostream>
 #include <queue>
+#include <deque>
 
 using namespace std;
 
+// default constructor
+TowerofHanoi::TowerofHanoi() {
+    diskSize = 0; // initialize disk size to 0
 
-void TowersofHanoi::pushDisk(int n) {
-
-    if(isFull()){
-        cout << "'A' stack is full.\n";
-    }
-    else{
-
-    }
 }
 
-void TowersofHanoi::popTopDisk(int &n){
+// return type is a deque
+deque<int>& TowerofHanoi::getTowerDisks() { 
 
-    if(isEmpty()){
-        cout << "The disk stack is empty.\n";
-    }
-    else{
-
-    }
+    return hanoiDisks;
 }
 
-bool TowersofHanoi::isFull() const{
-
-    bool status;
-
-    
+// this function uses the "this" pointer to make hanoiDisks deque equal to an
+// instance of a deque passed to it
+void TowerofHanoi::setHanoiDisks(deque<int> &hanoiDisks) {
+    this->hanoiDisks = hanoiDisks;
 }
 
-bool TowersofHanoi::isEmpty() const {
+// push a disk onto a tower
+void TowerofHanoi::pushDisk(int index) {
 
-    bool status;
-
-    
+    hanoiDisks.push_front(index);
 }
 
-// Towers of Hanoi implementation
-void TowersofHanoi::rbfs(){
+// pop the top disk off of a tower
+int TowerofHanoi::popTopDisk(){
 
+    int temp = hanoiDisks.front(); // temp variable holds top disk
+    this->hanoiDisks.pop_front(); // pop top disk (front of deque is top disk)
+
+    return temp;
 
 }
 

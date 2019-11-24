@@ -2,43 +2,44 @@
 #define HANOITOWERS_H
 
 /*
-    A priority queue implementation will be needed for the OPEN and CLOSED states.
-    A directed graph combined with the priority queue might be the best way to go,
-    but will explore other structures. A seperate header file will most likely be
-    needed to define a node structure for the graph.
+    Defines a class structure for each tower of hanoi that will be used in the program.
+    Creates a double-ended queue for a tower and its size will be defined by number of disks.
+    Additional functions will be used to setup initial towers and performs operations on them.
+
+    Deque is used as it is more efficient to insert or delete elements on both the beginning
+    and end of a queue. Note: contiguous storage may not be guaranteed.
 */
 
-// macro definitions
-#define FROM_PEG = 'A';
-#define TEMP_PEG = 'B';
-#define TO_PEG   = 'C';
-
-#include <queue> // library needed to implement a priority queue
+#include <deque> // library needed for double-ended queue
 using namespace std;
 
-class TowersofHanoi {
+// will be used to name towers
+enum HanoiTower {A, B, C};
+
+class TowerofHanoi {
 
     private:
 
-        priority_queue<int> init_state;
-        priority_queue<int> OPEN;
-        priority_queue<int> CLOSED;
-        int disks;
+        deque<int> hanoiDisks;    // creates a deque for each object of TowerofHanoi
+        int diskSize;             // defines total disks for a tower
 
 
     public:
-        
-        // recursive best-first search method
-        void rbfs();
 
-        // structure methods
-        void pushDisk(int);
-        void popTopDisk(int &);
-        bool isEmpty() const;
-        bool isFull() const;
+        // constructor
+        TowerofHanoi();
 
-        bool goal_reached();
+        // getter functions
+        deque<int>& getTowerDisks();
+        void getTopDisk();
 
+        // setter function to initialize towers
+        void setHanoiDisks(deque<int> &hanoiDisks);
+
+        // helper functions
+        void pushDisk(int );
+        int popTopDisk();
+        // Note: will use methods provided by deque to check for empty deque, clear, etc
 
 
 };
