@@ -1,15 +1,10 @@
 
-#ifdef _MSC_VER
-#  include <intrin.h>
-#  define __builtin_popcount __popcnt
-#endif
-#  define psnip_builtin_ffs(x)   __builtin_ffs(x)
-#  define psnip_builtin_clz(x)   __builtin_clz(x)
 #include <iostream>
 #include <vector>
 #include <string>
 #include <chrono>
 #include <map>
+#include <fstream>
 #include <sstream>
 #include "Header.h"
 
@@ -260,7 +255,26 @@ struct Node {
 
 typedef pair<int, Node*> frontPair;
 typedef pair<Tower, Node*> newPair;
+/*void process_mem_usage(double& vm_usage, double& resident_set)
+{
+	vm_usage = 0.0;
+	resident_set = 0.0;
 
+	// the two fields we want
+	unsigned long vsize;
+	long rss;
+	{
+		std::string ignore;
+		std::ifstream ifs("/proc/self/stat", std::ios_base::in);
+		ifs >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore
+			>> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore >> ignore
+			>> ignore >> ignore >> vsize >> rss;
+	}
+
+	long page_size_kb = sysconf(_SC_PAGE_SIZE) / 1024; 
+	vm_usage = vsize / 1024.0;
+	resident_set = rss * page_size_kb;
+}*/
 int main(int argc, char** argv) {
 
 /*	int choice;
@@ -335,7 +349,7 @@ int main(int argc, char** argv) {
 		cout << "\nExpand:\n" << tempNode->gameState.toString() << endl;
 
 		front.erase(front.begin());
-		vector<Tower> tempChildren = tempNode->gameState.nextStates();
+		 vector<Tower> tempChildren = tempNode->gameState.nextStates();
 
 
 		for (unsigned int i = 0; winningNode == NULL and i < tempChildren.size(); ++i) {
@@ -369,7 +383,11 @@ int main(int argc, char** argv) {
 			}
 
 		}
+
+		
 	}
+	
+
 	
 		
 		if (winningNode != NULL) {
@@ -384,14 +402,16 @@ int main(int argc, char** argv) {
 		else {
 			cout << "No path to goal!" << endl;
 		}
-
+		cout << "\nTotal number of nodes generated: " << sizeof(outpath) << endl;
+		cout << "\nTotal execution tiime for heuristic: " << duration.count() <<  "microseconds" <<endl;
 		//remove all nodes 
 		for (map <Tower, Node*>::iterator ct = generated.begin(); ct != generated.end(); ++ct) {
 			delete ct->second;
 		}
-		
+		double vm, rss;
+		//process_mem_usage(vm, rss);
+		//cout << "VM: " << vm << "; RSS: " << rss << endl;
 
-		
-		cout << "\nIt took " << duration.count() << "microseconds to find the solution" << std::endl;
+	
 		return 0;
 	}
