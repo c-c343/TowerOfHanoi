@@ -21,7 +21,7 @@ void ozy();
 /************************************************
  EDIT:	UPDATE NUMBER OF RINGS DESIRED
  ************************************************/
-int numrings=3;
+int numrings=8;
 
 int bitmask = (1 << numrings) - 1;
 
@@ -255,6 +255,7 @@ struct Node {
 
 typedef pair<int, Node*> frontPair;
 typedef pair<Tower, Node*> newPair;
+
 /*void process_mem_usage(double& vm_usage, double& resident_set)
 {
 	vm_usage = 0.0;
@@ -330,6 +331,7 @@ int main(int argc, char** argv) {
 	Node* workNode = NULL;
 	string outpath, tempstring;
 
+
 	generated.insert(newPair(tempNode->gameState, tempNode));
 	front.insert(frontPair(tempNode->estimatedCost, tempNode));
 	
@@ -347,6 +349,9 @@ int main(int argc, char** argv) {
 		//node w/ lowest cost
 		tempNode = front.begin()->second;
 		cout << "\nExpand:\n" << tempNode->gameState.toString() << endl;
+
+
+
 
 		front.erase(front.begin());
 		 vector<Tower> tempChildren = tempNode->gameState.nextStates();
@@ -388,7 +393,6 @@ int main(int argc, char** argv) {
 	}
 	
 
-	
 		
 		if (winningNode != NULL) {
 			cout << "Winning state reached." << endl;
@@ -402,8 +406,8 @@ int main(int argc, char** argv) {
 		else {
 			cout << "No path to goal!" << endl;
 		}
-		cout << "\nTotal number of nodes generated: " << sizeof(outpath) << endl;
-		cout << "\nTotal execution tiime for heuristic: " << duration.count() <<  "microseconds" <<endl;
+		cout << "\nTotal number of nodes generated: " << outpath.length() << endl;
+		cout << "\nTotal execution tiime for heuristic: " << duration.count() <<  " microseconds" <<endl;
 		//remove all nodes 
 		for (map <Tower, Node*>::iterator ct = generated.begin(); ct != generated.end(); ++ct) {
 			delete ct->second;
