@@ -9,7 +9,6 @@
     Deque is used as it is more efficient to insert or delete elements on both the beginning
     and end of a queue. Note: contiguous storage may not be guaranteed.
 */
-
 #include <deque> // library needed for double-ended queue
 using namespace std;
 
@@ -31,7 +30,7 @@ class TowerofHanoi {
 
         // getter functions
         deque<int>& getTowerDisks();
-        void getTopDisk();
+        int getTopDisk();
 
         // setter function to initialize towers
         void setHanoiDisks(deque<int> &hanoiDisks);

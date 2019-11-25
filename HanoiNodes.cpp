@@ -26,19 +26,6 @@ void HanoiNode::setParent(HanoiNode *node) {
 
     rootParentNode = node;
 }
-// generates a parent root node
-void HanoiNode::generateRootNode(deque<HanoiNode> &tree, int n) {
-
-    HanoiNode *root = new HanoiNode();
-    root->setParent(nullptr);
-    root->setG(-1);
-
-    // Push n disks to tower A
-    for(int i = n; i > 0; --i){
-        root->getHanoiTower(A).pushDisk(i);
-    }
-    tree.push_back(root);
-}
 
 // will be used to compare nodes (or element values) to see if they are in OPEN or CLOSED
 bool HanoiNode::isEqual(HanoiNode *node) {
@@ -70,12 +57,22 @@ void HanoiNode::setH(int h) {
 // TODO: implement whether goal has been found
 bool HanoiNode::isGoal() {
 
-    
+    return false;
 }
 
 
 // Recursive Best-First Search implementation
 void HanoiNode::rbfs(deque<int> &node, int f_limit){
 
-
+/*
+    1. Start with OPEN, containing just the initial state
+    2. Until a goal is found or there are no nodes on OPEN do:
+        a. pick the best node on OPEN
+        b. generate its successors
+        c. for each successor do:
+            i. if it has not been generated before, evaluate it, add it to OPEN, and record its parent
+            ii. if it has been generated before, change the parents if this new path is better than the
+                previous one. In that case, update the cost of getting to this node and to any successors
+                that this node may already have.
+*/
 }

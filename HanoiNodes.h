@@ -44,8 +44,6 @@ public:
     int getG(){ return g; }
     int getH(){ return h; }
 
-    // generates parent root node
-    void generateRootNode(deque<HanoiNode> &, int);
     // recursive best-first search method (args: node to expand, upper-bound cost limit)
     void rbfs(deque<int> &, int);
 

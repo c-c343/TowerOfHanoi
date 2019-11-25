@@ -38,6 +38,10 @@ deque<int>& TowerofHanoi::getTowerDisks() {
     return hanoiDisks;
 }
 
+int TowerofHanoi::getTopDisk() {
+    return hanoiDisks[0];
+}
+
 // this function uses the "this" pointer to make hanoiDisks deque equal to an
 // instance of a deque passed to it
 void TowerofHanoi::setHanoiDisks(deque<int> &hanoiDisks) {
