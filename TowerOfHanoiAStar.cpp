@@ -170,6 +170,21 @@ public:
 		return newVal;
 	}
 	void alexandra() {
+		
+		/* Heuristic Concept - Alexandra Hayes
+			Heuristics may control the A* algorithm's behavior. For f = g + h, if h is
+			equal to the cost of reaching the goal node, then the optimal path is found
+			while saving time and space by not expanding other nodes. This will be guaranteed
+			whereas if h is less than the cost, the shortest path may be found however
+			the time complexity will get worse and if h is greater than the cost, the tiime
+			complexitiy will be very fast however the optimal path is not guaranteed.
+				A cost function g'(n) = 1 + alpha * (g(n) - 1) assumes that the cost to travel
+				one space is 1 which if alpha equals 0 the function will always equal 1,
+				letting A* work with only valid/invalid gridspaces (i.e. when looking at a tree
+				which goes through all the possible moves for the Tower of Hanoi puzzle). This way,
+				the best of time and space complexity is reached.
+
+		*/
 
 	}
 	void ozy() {
