@@ -43,6 +43,16 @@ int main() {
     OPEN.push(tree.front()); // push parent node into OPEN
 
     // TODO: heuristic function(s)
+    		/*  Oswaldo Vielma
+			If h(n) is exactly equal to the cost of moving from n to the goal, then 
+			A* will only follow the best path and never expand anything else
+
+			| h(n) - h'(n) | = O(log(h'(n)))
+
+			where h'(n) is the optimal heuristic, the exact cost to get from node n to the goal.
+			In other words, h(n) will not grow faster than the logarithm of the "perfect heuristic" 
+			h'(n) that returns the true distance from x to the goal.
+		*/
 
 
     // TODO: call RBFS algorithm function
