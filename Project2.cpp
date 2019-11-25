@@ -8,18 +8,24 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <chrono>
 #include <map>
 #include <sstream>
 #include "Header.h"
 
-//#include "Tower.h"
-#include "Header.h"
 
 using namespace std;
+using namespace std::chrono;
+
+//function definitions for heuristics
+
 int cynthia();
 void alexandra();
 void ozy();
 
+/************************************************
+ EDIT:	UPDATE NUMBER OF RINGS DESIRED
+ ************************************************/
 int numrings=3;
 
 int bitmask = (1 << numrings) - 1;
@@ -28,10 +34,10 @@ class Tower {
 private:
 	int peg1, peg2, peg3;
 
-	Tower(int p1, int p2, int p3) {
-		peg1 = p1;
-		peg2 = p2;
-		peg3 = p3;
+	Tower(int temp1, int temp2, int temp3) {
+		peg1 = temp1;
+		peg2 = temp2;
+		peg3 = temp3;
 	}
 public:
 	//This creates a state with all rings on starting peg.
@@ -41,44 +47,53 @@ public:
 		peg3 = 0;
 	}
 
+
+	//operator functions needed for stl map 
 	bool operator<(const Tower& other) const {
 		return (peg1 == other.peg1) ? ((peg2 == other.peg2) ? (peg3 < other.peg3) : (peg2 < other.peg2)) : (peg1 < other.peg1);
 	}
-
 	bool operator==(const Tower& other) const {
 		return (peg1 == other.peg1) and (peg2 == other.peg2) and (peg3 == other.peg3);
 	}
-
 	bool operator!=(const Tower& other) const {
 		return (peg1 != other.peg1) or (peg2 != other.peg2) or (peg3 != other.peg3);
 	}
 
-	bool isWinning()const {//all rings are on a goal peg
+
+
+	bool win()const {
 		return peg2 == bitmask or peg3 == bitmask;
 	}
-
-	bool isError() const {
+	//Validation: If move is invalid, define error.
+	bool error() {
 		return (peg1 < 0) or (peg2 < 0) or (peg3 < 0);
 	}
 
+
+	/* 
+
+	Possible moves for disks
+	Returns true if move is legal, false if otherwise
+
+	*/
 	bool move(const int m)const {
-		int a = (!peg1) ? 33 : __builtin_ffs(peg1);
-		int b = (!peg2) ? 33 : __builtin_ffs(peg2);
-		int c = (!peg3) ? 33 : __builtin_ffs(peg3);
+		int ring1 = (!peg1) ? 33 : __builtin_ffs(peg1);
+		int ring2 = (!peg2) ? 33 : __builtin_ffs(peg2);
+		int ring3 = (!peg3) ? 33 : __builtin_ffs(peg3);
 
 		switch (m) {
 		case 0:
-			return a < b;
+			return ring1 < ring2;
 		case 1:
-			return b < c;
+			return ring2 < ring3;
 		case 2:
-			return c < a;
+			return ring3 < ring1;
 		case 3:
-			return a > b;
+			return ring1 > ring2;
 		case 4:
-			return b > c;
+			return ring2 > ring3;
 		case 5:
-			return c > a;
+			return ring3 > ring1;
 		default:
 			return false;
 		}
@@ -88,13 +103,13 @@ public:
 		Tower value = *this;
 
 
-		int a = (!peg1) ? 33 : __builtin_ffs(peg1);
-		int b = (!peg2) ? 33 : __builtin_ffs(peg2);
-		int c = (!peg3) ? 33 : __builtin_ffs(peg3);
+		int ring1 = (!peg1) ? 33 : __builtin_ffs(peg1);
+		int ring2 = (!peg2) ? 33 : __builtin_ffs(peg2);
+		int ring3 = (!peg3) ? 33 : __builtin_ffs(peg3);
 
-		a--;
-		b--;
-		c--;
+		ring1--;
+		ring2--;
+		ring3--;
 
 		if (!move(m))
 			return Tower(-1, -1, -1);
@@ -102,57 +117,69 @@ public:
 		switch (m) {
 		//remove the lowest value ring from peg1 and add to peg 2
 		case 0:
-			value.peg1 ^= (1 << a);
-			value.peg2 ^= (1 << a);
+			value.peg1 ^= (1 << ring1);
+			value.peg2 ^= (1 << ring1);
 			return value;
 		//peg2 to peg3 and so on
 		case 1:
-			value.peg2 ^= (1 << b);
-			value.peg3 ^= (1 << b);
+			value.peg2 ^= (1 << ring2);
+			value.peg3 ^= (1 << ring2);
 			return value;
 		case 2:
-			value.peg3 ^= (1 << c);
-			value.peg1 ^= (1 << c);
+			value.peg3 ^= (1 << ring3);
+			value.peg1 ^= (1 << ring3);
 			return value;
 		case 3:
-			value.peg2 ^= (1 << b);
-			value.peg1 ^= (1 << b);
+			value.peg2 ^= (1 << ring2);
+			value.peg1 ^= (1 << ring2);
 			return value;
 		case 4:
-			value.peg3 ^= (1 << c);
-			value.peg2 ^= (1 << c);
+			value.peg3 ^= (1 << ring3);
+			value.peg2 ^= (1 << ring3);
 			return value;
 		case 5:
-			value.peg1 ^= (1 << a);
-			value.peg3 ^= (1 << a);
+			value.peg1 ^= (1 << ring1);
+			value.peg3 ^= (1 << ring1);
 			return value;
 		}
 
 		return Tower(-1, -1, -1);
 	}
 
-	//heuristic function for all items to reach a goal peg
-	int h()const{
-
+	/*heuristic function for all items to reach a goal peg
+		Heuristic by Cynthia
+	*/
+	int cynthia()const{
+		
 		int newVal = 1 << numrings;
-		int a = (peg1 == bitmask) ? 0 : (32 - __builtin_clz(~(~bitmask | peg1)));
+		
+		/*
+		calculates the number of rings previously moved from first peg.
+		Need number of leading ones before 1st 0 on peg 1 so __builtin_clz is 
+		used to return number of leading zero bits. Here, this is still undefined
+		*/
+		int ring1 = (peg1 == bitmask) ? 0 : (32 - __builtin_clz(~(~bitmask | peg1)));
+		int ring2 = (peg2 == 0) ? 0 : (32 - __builtin_clz(peg2));
+		int ring3 = (peg3 == 0) ? 0 : (32 - __builtin_clz(peg3));
 
+		newVal = newVal - 1 << ring1;
 
-		int b = (peg2 == 0) ? 0 : (32 - __builtin_clz(peg2));
-		int c = (peg3 == 0) ? 0 : (32 - __builtin_clz(peg3));
-
-		newVal -= 1 << a;
-
-		if (b > c) {
-			newVal += (a - __builtin_popcount(peg2));
+		if (ring2 > ring3) {
+			newVal = newVal + (ring1 - __builtin_popcount(peg2));
 		}
-		else if (c > b) {
-			newVal += (a - __builtin_popcount(peg3));
+		else if (ring3 > ring2) {
+			newVal = newVal + (ring1 - __builtin_popcount(peg3));
 		}
+		
 
 		return newVal;
 	}
+	void alexandra() {
 
+	}
+	void ozy() {
+
+	}
 
 	vector <Tower> nextStates()const {
 		vector <Tower> n;
@@ -163,23 +190,24 @@ public:
 		return n;
 	}
 	string toString()const {
-		std::ostringstream sbuilder;
-		string arr[100];
-
-		sbuilder << " peg 1: ";
-		for (int i = 0; i < 31; ++i) {
+		//ostringstream used as a shortcut to access char vals directly as string object.
+		ostringstream sbuilder;
+		//string arr[100];
+		int i = 0;
+		sbuilder << "\t peg 1: ";
+		for (i = 0; i < 31; ++i) {
 			if ((1 << i) & peg1)
 				sbuilder << i + 1 << "->";
 		}
 		
 		sbuilder << "\tpeg 2:  ";
-		for (int i = 0; i < 31; ++i) {
+		for (i = 0; i < 31; ++i) {
 			if ((1 << i) & peg2)
 				sbuilder << i + 1 << "->";
 		}
 		sbuilder << "\tpeg 3: ";
 
-		for (int i = 0; i < 31; ++i) {
+		for (i = 0; i < 31; ++i) {
 			if ((1 << i) & peg3)
 				sbuilder << i + 1 << "->";
 		}
@@ -203,16 +231,16 @@ struct Node {
 			cost = 0;
 		else
 			cost = next->cost + 1;
-		estimatedCost = gameState.h();
+		estimatedCost = gameState.cynthia();
 	}
 
-
-	bool updateCostCond(int newcost, Node* newparent, multimap<int, Node*>& front) {
+	//if new cost is better, update...
+	bool costUpdate(int newcost, Node* newparent, multimap<int, Node*>& front) {
 		if (newcost < cost) {
 			for (multimap<int,Node*>::iterator ct = front.lower_bound(cost); ct != front.upper_bound(cost); ct++) {
 				if (ct->second == this) {
 					front.erase(ct);
-					front.insert(std::pair<int, Node*>(newcost + estimatedCost, this));
+					front.insert(pair<int, Node*>(newcost + estimatedCost, this));
 					break;
 				}
 			}
@@ -221,8 +249,8 @@ struct Node {
 			parent = newparent;
 
 			//update any children
-			for (unsigned int i = 0; i < childNode.size(); ++i) {
-				childNode[i]->updateCostCond(newcost + 1, this, front);
+			for (int i = 0; i < childNode.size(); ++i) {
+				childNode[i]->costUpdate(newcost + 1, this, front);
 			}
 			return true;
 		}
@@ -230,11 +258,10 @@ struct Node {
 	}
 };
 
-typedef std::pair<int, Node*> frontPair;
-typedef std::pair<Tower, Node*> newPair;
+typedef pair<int, Node*> frontPair;
+typedef pair<Tower, Node*> newPair;
 
 int main(int argc, char** argv) {
-
 
 /*	int choice;
 	cout << "Hi, welcome to our game of 'Towers of Hanoi' ! \n";
@@ -245,33 +272,45 @@ int main(int argc, char** argv) {
 	switch (choice) {
 	case 1:
 		cynthia();
+		break;
+	case 2:
+		alexandra();
+		break;
+	case 3:
+		ozy();
+		break
 
 	}*/
-
-	cout << "\t\tWelcome to or game of 'Towers of Hanoi'! \n";
-	cout << "\t\tStarting with " << numrings << " rings\n\n";
-
-
 
 	Node* winningNode = NULL;
 	map <Tower, Node*> generated;
 
+
+	cout << "\t\tWelcome to or game of 'Towers of Hanoi'! \n\n\n";
+	cout << "\t\tStarting with " << numrings << " rings...\n\n";
+	cout << "**************************************************\n";
 	//maps all nodes to f() cost
 	multimap <int, Node*> front;
 
 	if (argc == 2) {
-		std::istringstream argument(argv[1]);
-		int tempnumrings = -1;
-		argument >> tempnumrings;
+		istringstream argument(argv[1]);
+		//sscanf(argument, argv[1]);
+		int temp = -1;
+		argument >> temp;
 
-		if (tempnumrings > 1) {
-			numrings = tempnumrings;
+		if (temp > 1) {
+			numrings = temp;
 			bitmask = (1 << numrings) - 1;
 		}
 	}
 
 	//current node
+
+	auto start = high_resolution_clock::now();
 	Node* tempNode = new Node(Tower(), NULL);
+	auto stop = high_resolution_clock::now();
+	auto duration = duration_cast<microseconds>(stop - start);
+
 
 	//temporary nodes to format output of winning path
 	Node* workNode = NULL;
@@ -279,10 +318,9 @@ int main(int argc, char** argv) {
 
 	generated.insert(newPair(tempNode->gameState, tempNode));
 	front.insert(frontPair(tempNode->estimatedCost, tempNode));
-
+	
 
 	while (winningNode == NULL and !front.empty()) {
-
 
 		cout << "\Front Nodes:\n";
 		for (multimap<int, Node*>::iterator ct = front.begin();
@@ -292,35 +330,35 @@ int main(int argc, char** argv) {
 				<< " g=" << ct->second->cost
 				<< " f=" << ct->first << endl;
 		}
-
 		//node w/ lowest cost
 		tempNode = front.begin()->second;
-		cout << "\nExpand:\t" << tempNode->gameState.toString() << endl;
+		cout << "\nExpand:\n" << tempNode->gameState.toString() << endl;
 
 		front.erase(front.begin());
 		vector<Tower> tempChildren = tempNode->gameState.nextStates();
+
+
 		for (unsigned int i = 0; winningNode == NULL and i < tempChildren.size(); ++i) {
 
 			if (tempChildren[i] != tempNode->gameState) {
-				cout << "\nGenerated:\t" << tempChildren[i].toString() << '\t';
+				cout << "\nGenerated:\n" << tempChildren[i].toString() << '\t';
 
 				if (generated.count(tempChildren[i]) > 0) {
-					cout << "\nRegenerated\t";
-					if (generated[tempChildren[i]]->updateCostCond(tempNode->cost + 1, tempNode, front))
-						cout << "\nUpdated F\t";
+					cout << "\nRegenerated\n";
+					if (generated[tempChildren[i]]->costUpdate(tempNode->cost + 1, tempNode, front))
+						cout << "\nUpdated \n";
 					else
-						cout << "\nNo update\t";
+						cout << "\nNo update\n";
 				}
 				else {
 					cout << "New node\t  \t";
 					workNode = new Node(tempChildren[i], tempNode);
 					generated.insert(newPair(workNode->gameState, workNode));
 					front.insert(frontPair(workNode->cost + workNode->estimatedCost, workNode));
-					if (workNode->gameState.isWinning()) {
+					if (workNode->gameState.win()) {
 						winningNode = workNode;
 					}
 				}
-				
 				tempNode->childNode.push_back(generated[tempChildren[i]]);
 
 				cout << "g=" << generated[tempChildren[i]]->cost
@@ -332,7 +370,7 @@ int main(int argc, char** argv) {
 
 		}
 	}
-
+	
 		
 		if (winningNode != NULL) {
 			cout << "Winning state reached." << endl;
@@ -351,5 +389,9 @@ int main(int argc, char** argv) {
 		for (map <Tower, Node*>::iterator ct = generated.begin(); ct != generated.end(); ++ct) {
 			delete ct->second;
 		}
+		
+
+		
+		cout << "\nIt took " << duration.count() << "microseconds to find the solution" << std::endl;
 		return 0;
 	}
